@@ -44,12 +44,26 @@ export default function App() {
         let lastThenId = null;
         let lastElseId = null;
 
-        data.instructions.forEach((inst, i) => {
+        // Copy the instructions array
+        let copied_instructions = [...data.instructions];
+
+        // If the last instruction is a Loop, add a virtual Loop End instruction
+        if (copied_instructions[copied_instructions.length - 1].type === 'Loop') {
+          let sub_instructions_in_last_loop = copied_instructions[copied_instructions.length - 1].args.instructions;
+          copied_instructions.push({
+            seq: sub_instructions_in_last_loop[sub_instructions_in_last_loop.length - 1].seq + 1,
+            type: 'LoopEnd',
+            objective: 'End of Loop',
+            args: {}
+          });
+        }
+
+        copied_instructions.forEach((inst, i) => {
           const currentId = inst.seq.toString();
           nodes.push({
             id: currentId,
             position: { x: 180, y: 140 + 100 * y },
-            data: { label: `Instruction #${inst.seq}: ${inst.type}` },
+            data: { label: inst.type === 'LoopEnd' ? 'Loop End' : `Instruction #${inst.seq}: ${inst.type}` },
             raw: inst,
           });
 
@@ -61,7 +75,7 @@ export default function App() {
             lastElseId = null;
           } else if (i > 0) {
             // if it's not the first instruction, add an edge from the previous instruction
-            edges.push({ id: 'e' + currentId, source: data.instructions[i - 1].seq.toString(), target: currentId, animated: true, style: { stroke: 'blue' } });
+            edges.push({ id: 'e' + currentId, source: copied_instructions[i - 1].seq.toString(), target: currentId, animated: true, style: { stroke: 'blue' } });
           }
 
           y++;
@@ -110,8 +124,8 @@ export default function App() {
                 edges.push({ id: 'e' + loopId, source: currentId, target: loopId, animated: true, style: { stroke: 'blue' } });
               }
               // last instruction in the loop, connect it to the next instruction after loop
-              if (loopIndex === inst.args.instructions.length - 1 && i < data.instructions.length - 1) {
-                edges.push({ id: 'e' + loopId + '-' + data.instructions[i + 1].seq.toString(), source: loopId, target: data.instructions[i + 1].seq.toString(), animated: true, style: { stroke: 'blue' } });
+              if (loopIndex === inst.args.instructions.length - 1 && i < copied_instructions.length - 1) {
+                edges.push({ id: 'e' + loopId + '-' + copied_instructions[i + 1].seq.toString(), source: loopId, target: copied_instructions[i + 1].seq.toString(), animated: true, style: { stroke: 'blue' } });
               }
               y++;
             });
