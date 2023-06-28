@@ -77,7 +77,7 @@ export default function App() {
           nodes.push({
             id: currentId,
             position: { x: 180, y: 140 + 150 * y },
-            data: { label: inst.type === 'LoopEnd' ? 'Loop End' : inst.type === "Loop" ? `Loop: ${inst.objective}` : inst.objective },
+            data: { label: inst.type === 'LoopEnd' ? 'Loop End' : `[${inst.type}] ${inst.objective}` },
             raw: inst,
           });
 
@@ -100,20 +100,20 @@ export default function App() {
             nodes.push({
               id: thenId,
               position: { x: 80, y: 140 + 150 * y + 10 },
-              data: { label: `${thenInst.objective}` },
+              data: { label: `[${thenInst.type}] ${thenInst.objective}` },
               raw: thenInst,
             });
-            edges.push({ id: 'e' + thenId, source: currentId, target: thenId, animated: true, style: { stroke: themeColor }, label: 'Yes' });
+            edges.push({ id: 'e' + thenId, source: currentId, target: thenId, animated: true, style: { stroke: themeColor } });
 
             const elseInst = inst.else[0];  // assuming each branch only has one instruction for simplicity
             const elseId = `${elseInst.seq}`;
             nodes.push({
               id: elseId,
               position: { x: 280, y: 140 + 150 * y + 10 },
-              data: { label: `${elseInst.objective}` },
+              data: { label: `[${elseInst.type}] ${elseInst.objective}` },
               raw: elseInst,
             });
-            edges.push({ id: 'e' + elseId, source: currentId, target: elseId, animated: true, style: { stroke: themeColor }, label: 'No' });
+            edges.push({ id: 'e' + elseId, source: currentId, target: elseId, animated: true, style: { stroke: themeColor } });
 
             // store the IDs of the 'then' and 'else' instructions
             lastThenId = thenId;
@@ -128,7 +128,7 @@ export default function App() {
               nodes.push({
                 id: loopId,
                 position: { x: 280, y: 140 + 150 * y },
-                data: { label: `${loopInst.objective}` },
+                data: { label: `[${loopInst.type}] ${loopInst.objective}` },
                 raw: loopInst,
               });
               if (loopIndex > 0) {
