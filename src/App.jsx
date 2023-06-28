@@ -76,8 +76,8 @@ export default function App() {
           const currentId = inst.seq.toString();
           nodes.push({
             id: currentId,
-            position: { x: 180, y: 140 + 100 * y },
-            data: { label: inst.type === 'LoopEnd' ? 'Loop End' : `Instruction #${inst.seq}: ${inst.type}` },
+            position: { x: 180, y: 140 + 150 * y },
+            data: { label: inst.type === 'LoopEnd' ? 'Loop End' : inst.type === "Loop" ? `Loop: ${inst.objective}` : inst.objective },
             raw: inst,
           });
 
@@ -99,21 +99,21 @@ export default function App() {
             const thenId = `${thenInst.seq}`;
             nodes.push({
               id: thenId,
-              position: { x: 80, y: 140 + 100 * y },
-              data: { label: `Instruction #${thenInst.seq} (then branch): ${thenInst.type}` },
+              position: { x: 80, y: 140 + 150 * y + 10 },
+              data: { label: `${thenInst.objective}` },
               raw: thenInst,
             });
-            edges.push({ id: 'e' + thenId, source: currentId, target: thenId, animated: true, style: { stroke: themeColor } });
+            edges.push({ id: 'e' + thenId, source: currentId, target: thenId, animated: true, style: { stroke: themeColor }, label: 'Yes' });
 
             const elseInst = inst.else[0];  // assuming each branch only has one instruction for simplicity
             const elseId = `${elseInst.seq}`;
             nodes.push({
               id: elseId,
-              position: { x: 280, y: 140 + 100 * y },
-              data: { label: `Instruction #${elseInst.seq} (else branch): ${elseInst.type}` },
+              position: { x: 280, y: 140 + 150 * y + 10 },
+              data: { label: `${elseInst.objective}` },
               raw: elseInst,
             });
-            edges.push({ id: 'e' + elseId, source: currentId, target: elseId, animated: true, style: { stroke: themeColor } });
+            edges.push({ id: 'e' + elseId, source: currentId, target: elseId, animated: true, style: { stroke: themeColor }, label: 'No' });
 
             // store the IDs of the 'then' and 'else' instructions
             lastThenId = thenId;
@@ -127,8 +127,8 @@ export default function App() {
               const loopId = `${loopInst.seq}`;
               nodes.push({
                 id: loopId,
-                position: { x: 280, y: 140 + 100 * y },
-                data: { label: `Instruction #${loopInst.seq} (loop): ${loopInst.type}` },
+                position: { x: 280, y: 140 + 150 * y },
+                data: { label: `${loopInst.objective}` },
                 raw: loopInst,
               });
               if (loopIndex > 0) {
@@ -153,7 +153,7 @@ export default function App() {
         console.error(error);
       });
     }
-  }, [selectedNode, setINodes, setIEdges]);
+  }, [selectedNode, setINodes, setIEdges, themeColor]);
 
   if (loading) {
     return <div>Loading...</div>;
