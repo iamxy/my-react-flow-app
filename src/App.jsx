@@ -55,13 +55,13 @@ export default function App() {
 
           if (lastThenId !== null && lastElseId !== null) {
             // connect the previous 'then' and 'else' instructions to this instruction
-            edges.push({ id: 'e' + lastThenId + '-' + currentId, source: lastThenId, target: currentId, animated: true, style: { stroke: 'red' } });
-            edges.push({ id: 'e' + lastElseId + '-' + currentId, source: lastElseId, target: currentId, animated: true, style: { stroke: 'red' } });
+            edges.push({ id: 'e' + lastThenId + '-' + currentId, source: lastThenId, target: currentId, animated: true, style: { stroke: 'blue' } });
+            edges.push({ id: 'e' + lastElseId + '-' + currentId, source: lastElseId, target: currentId, animated: true, style: { stroke: 'blue' } });
             lastThenId = null;
             lastElseId = null;
           } else if (i > 0) {
             // if it's not the first instruction, add an edge from the previous instruction
-            edges.push({ id: 'e' + currentId, source: data.instructions[i - 1].seq.toString(), target: currentId, animated: true, style: { stroke: 'red' } });
+            edges.push({ id: 'e' + currentId, source: data.instructions[i - 1].seq.toString(), target: currentId, animated: true, style: { stroke: 'blue' } });
           }
 
           y++;
@@ -75,7 +75,7 @@ export default function App() {
               data: { label: `Instruction #${thenInst.seq} (then branch): ${thenInst.type}` },
               raw: thenInst,
             });
-            edges.push({ id: 'e' + thenId, source: currentId, target: thenId, animated: true, style: { stroke: 'red' } });
+            edges.push({ id: 'e' + thenId, source: currentId, target: thenId, animated: true, style: { stroke: 'blue' } });
 
             const elseInst = inst.else[0];  // assuming each branch only has one instruction for simplicity
             const elseId = `${elseInst.seq}`;
@@ -85,7 +85,7 @@ export default function App() {
               data: { label: `Instruction #${elseInst.seq} (else branch): ${elseInst.type}` },
               raw: elseInst,
             });
-            edges.push({ id: 'e' + elseId, source: currentId, target: elseId, animated: true, style: { stroke: 'red' } });
+            edges.push({ id: 'e' + elseId, source: currentId, target: elseId, animated: true, style: { stroke: 'blue' } });
 
             // store the IDs of the 'then' and 'else' instructions
             lastThenId = thenId;
@@ -104,10 +104,14 @@ export default function App() {
                 raw: loopInst,
               });
               if (loopIndex > 0) {
-                edges.push({ id: 'e' + loopId, source: inst.args.instructions[loopIndex - 1].seq.toString(), target: loopId, animated: true, style: { stroke: 'red' } });
+                edges.push({ id: 'e' + loopId, source: inst.args.instructions[loopIndex - 1].seq.toString(), target: loopId, animated: true, style: { stroke: 'blue' } });
               } else {
                 // first instruction in the loop, connect it to the loop instruction
-                edges.push({ id: 'e' + loopId, source: currentId, target: loopId, animated: true, style: { stroke: 'red' } });
+                edges.push({ id: 'e' + loopId, source: currentId, target: loopId, animated: true, style: { stroke: 'blue' } });
+              }
+              // last instruction in the loop, connect it to the next instruction after loop
+              if (loopIndex === inst.args.instructions.length - 1 && i < data.instructions.length - 1) {
+                edges.push({ id: 'e' + loopId + '-' + data.instructions[i + 1].seq.toString(), source: loopId, target: data.instructions[i + 1].seq.toString(), animated: true, style: { stroke: 'blue' } });
               }
               y++;
             });
