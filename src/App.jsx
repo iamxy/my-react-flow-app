@@ -41,6 +41,9 @@ export default function App() {
         let y = 0;
         const nodes = [];
         const edges = [];
+        let lastThenId = null;
+        let lastElseId = null;
+
         data.instructions.forEach((inst, i) => {
           const currentId = inst.seq.toString();
           nodes.push({
@@ -50,7 +53,13 @@ export default function App() {
             raw: inst,
           });
 
-          if (i > 0) {
+          if (lastThenId !== null && lastElseId !== null) {
+            // connect the previous 'then' and 'else' instructions to this instruction
+            edges.push({ id: 'e' + lastThenId + '-' + currentId, source: lastThenId, target: currentId, animated: true, style: { stroke: 'red' } });
+            edges.push({ id: 'e' + lastElseId + '-' + currentId, source: lastElseId, target: currentId, animated: true, style: { stroke: 'red' } });
+            lastThenId = null;
+            lastElseId = null;
+          } else if (i > 0) {
             // if it's not the first instruction, add an edge from the previous instruction
             edges.push({ id: 'e' + currentId, source: data.instructions[i - 1].seq.toString(), target: currentId, animated: true, style: { stroke: 'red' } });
           }
@@ -77,6 +86,10 @@ export default function App() {
               raw: elseInst,
             });
             edges.push({ id: 'e' + elseId, source: currentId, target: elseId, animated: true, style: { stroke: 'red' } });
+
+            // store the IDs of the 'then' and 'else' instructions
+            lastThenId = thenId;
+            lastElseId = elseId;
 
             y++;
           }
