@@ -30,7 +30,7 @@ function usePlan(url) {
             source: source.toString(),
             target: target,
             animated: true,
-            style: { stroke: 'red' },
+            style: { stroke: 'deeppink' },
           }));
         });
 

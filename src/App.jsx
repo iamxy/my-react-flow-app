@@ -11,6 +11,8 @@ import useInstruction from './useInstruction';
 import 'reactflow/dist/style.css';
 
 export default function App() {
+  const [theme, setTheme] = useState({});
+  const [themeColor, setThemeColor] = useState('red');
   const { nodes, edges, loading, error, setEdges, onEdgesChange, onNodesChange } = usePlan('/static/plan.json');
   const { iNodes, iEdges, setINodes, setIEdges, onINodesChange, onIEdgesChange } = useInstruction();
   const [selectedNode, setSelectedNode] = useState(null);
@@ -26,6 +28,18 @@ export default function App() {
 
   const handleINodeClick = useCallback((_, node) => {
     setSelectedINode(node);
+  }, []);
+
+  useEffect(() => {
+    if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+      // Set dark theme
+      setTheme("monokai");
+      setThemeColor("aqua")
+    } else {
+      // Set light theme
+      setTheme("rjv-default");
+      setThemeColor("blue")
+    }
   }, []);
 
   useEffect(() => {
@@ -69,13 +83,13 @@ export default function App() {
 
           if (lastThenId !== null && lastElseId !== null) {
             // connect the previous 'then' and 'else' instructions to this instruction
-            edges.push({ id: 'e' + lastThenId + '-' + currentId, source: lastThenId, target: currentId, animated: true, style: { stroke: 'blue' } });
-            edges.push({ id: 'e' + lastElseId + '-' + currentId, source: lastElseId, target: currentId, animated: true, style: { stroke: 'blue' } });
+            edges.push({ id: 'e' + lastThenId + '-' + currentId, source: lastThenId, target: currentId, animated: true, style: { stroke: themeColor } });
+            edges.push({ id: 'e' + lastElseId + '-' + currentId, source: lastElseId, target: currentId, animated: true, style: { stroke: themeColor } });
             lastThenId = null;
             lastElseId = null;
           } else if (i > 0) {
             // if it's not the first instruction, add an edge from the previous instruction
-            edges.push({ id: 'e' + currentId, source: copied_instructions[i - 1].seq.toString(), target: currentId, animated: true, style: { stroke: 'blue' } });
+            edges.push({ id: 'e' + currentId, source: copied_instructions[i - 1].seq.toString(), target: currentId, animated: true, style: { stroke: themeColor } });
           }
 
           y++;
@@ -89,7 +103,7 @@ export default function App() {
               data: { label: `Instruction #${thenInst.seq} (then branch): ${thenInst.type}` },
               raw: thenInst,
             });
-            edges.push({ id: 'e' + thenId, source: currentId, target: thenId, animated: true, style: { stroke: 'blue' } });
+            edges.push({ id: 'e' + thenId, source: currentId, target: thenId, animated: true, style: { stroke: themeColor } });
 
             const elseInst = inst.else[0];  // assuming each branch only has one instruction for simplicity
             const elseId = `${elseInst.seq}`;
@@ -99,7 +113,7 @@ export default function App() {
               data: { label: `Instruction #${elseInst.seq} (else branch): ${elseInst.type}` },
               raw: elseInst,
             });
-            edges.push({ id: 'e' + elseId, source: currentId, target: elseId, animated: true, style: { stroke: 'blue' } });
+            edges.push({ id: 'e' + elseId, source: currentId, target: elseId, animated: true, style: { stroke: themeColor } });
 
             // store the IDs of the 'then' and 'else' instructions
             lastThenId = thenId;
@@ -118,14 +132,14 @@ export default function App() {
                 raw: loopInst,
               });
               if (loopIndex > 0) {
-                edges.push({ id: 'e' + loopId, source: inst.args.instructions[loopIndex - 1].seq.toString(), target: loopId, animated: true, style: { stroke: 'blue' } });
+                edges.push({ id: 'e' + loopId, source: inst.args.instructions[loopIndex - 1].seq.toString(), target: loopId, animated: true, style: { stroke: themeColor } });
               } else {
                 // first instruction in the loop, connect it to the loop instruction
-                edges.push({ id: 'e' + loopId, source: currentId, target: loopId, animated: true, style: { stroke: 'blue' } });
+                edges.push({ id: 'e' + loopId, source: currentId, target: loopId, animated: true, style: { stroke: themeColor } });
               }
               // last instruction in the loop, connect it to the next instruction after loop
               if (loopIndex === inst.args.instructions.length - 1 && i < copied_instructions.length - 1) {
-                edges.push({ id: 'e' + loopId + '-' + copied_instructions[i + 1].seq.toString(), source: loopId, target: copied_instructions[i + 1].seq.toString(), animated: true, style: { stroke: 'blue' } });
+                edges.push({ id: 'e' + loopId + '-' + copied_instructions[i + 1].seq.toString(), source: loopId, target: copied_instructions[i + 1].seq.toString(), animated: true, style: { stroke: themeColor } });
               }
               y++;
             });
@@ -180,9 +194,9 @@ export default function App() {
       </div>
       <div style={{ flexBasis: '40%', height: '100%', overflow: 'auto', position: 'relative' }}>
         <h3>{selectedNode && "Task #" + selectedNode.raw.task_num}</h3>
-        {selectedNode && <ReactJson src={selectedNode.raw} />}
+        {selectedNode && <ReactJson src={selectedNode.raw} theme={theme} />}
         <h3>{selectedINode && "Instruction #" + selectedINode.raw.seq}</h3>
-        {selectedINode && <ReactJson src={selectedINode.raw} />}
+        {selectedINode && <ReactJson src={selectedINode.raw} theme={theme} />}
       </div>
     </div>
   );
