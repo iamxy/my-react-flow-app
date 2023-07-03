@@ -7,13 +7,14 @@ import ReactFlow, {
 import ReactJson from 'react-json-view';
 import usePlan from './usePlan';
 import useInstruction from './useInstruction';
+import jsYaml from 'js-yaml';
 
 import 'reactflow/dist/style.css';
 
 export default function App() {
   const [theme, setTheme] = useState({});
   const [themeColor, setThemeColor] = useState('red');
-  const { nodes, edges, loading, error, setEdges, onEdgesChange, onNodesChange } = usePlan('/static/plan.json');
+  const { nodes, edges, loading, error, setEdges, onEdgesChange, onNodesChange } = usePlan('/static/plan.yaml');
   const { iNodes, iEdges, setINodes, setIEdges, onINodesChange, onIEdgesChange } = useInstruction();
   const [selectedNode, setSelectedNode] = useState(null);
   const [selectedINode, setSelectedINode] = useState(null);
@@ -44,14 +45,15 @@ export default function App() {
 
   useEffect(() => {
     if (selectedNode !== null && selectedNode.id !== null) {
-      fetch('/static/' + selectedNode.id + '.json')
+      fetch('/static/' + selectedNode.id + '.yaml')
       .then((response) => {
         if (!response.ok) {
           throw new Error('Network response was not ok');
         }
-        return response.json();
+        return response.text();
       })
-      .then((data) => {
+      .then((yamlText) => {
+        let data = jsYaml.load(yamlText);
         let y = 0;
         const nodes = [];
         const edges = [];

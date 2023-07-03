@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNodesState, useEdgesState } from 'reactflow';
+import jsYaml from 'js-yaml';
 
 function usePlan(url) {
   const [loading, setLoading] = useState(true);
@@ -14,9 +15,10 @@ function usePlan(url) {
         if (!response.ok) {
           throw new Error('Network response was not ok');
         }
-        return response.json();
+        return response.text();
       })
-      .then((data) => {
+      .then((yamlText) => {
+        let data = jsYaml.load(yamlText);
         const nodes = data.task_list.map((task, index) => ({
           id: task.task_num.toString(),
           position: { x: (index % 2 === 0 ? 130 : 70), y: 100 + 150 * index },
